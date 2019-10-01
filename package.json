@@ -12,8 +12,8 @@
     "build:client": "ng build --prod",
     "build:server": "tsc --project src/server/tsconfig.server.json",
     "test": "npm run test:client && npm run test:server",
-    "test:client": "npm run lint:client && npm run build:client",
-    "test:server": "npm run lint:server && npm run build:server",
+    "test:client": "ng test --code-coverage && npm run lint:client && npm run build:client",
+    "test:server": "ng test --code-coverage && npm run lint:server && npm run build:server",
     "lint:client": "ng lint",
     "lint:server": "tslint --project src/server/tsconfig.server.json",
     "setup": "node scripts/post-install && npm run seed",
@@ -21,7 +21,8 @@
     "dummyplayers": "node scripts/client/client",
     "combattest": "ts-node --project src/server/tsconfig.server.json scripts/combat-test.ts",
     "itemtest": "ts-node --project src/server/tsconfig.server.json scripts/item-test.ts",
-    "debug:server": "TS_NODE_PROJECT=src/server/tsconfig.server.json node --inspect=0.0.0.0 -r ts-node/register src/server/index.ts"
+    "debug:server": "TS_NODE_PROJECT=src/server/tsconfig.server.json node --inspect=0.0.0.0 -r ts-node/register src/server/index.ts",
+    "sonar": "sonar-scanner"
   },
   "dependencies": {
     "@angular/common": "^7.2.2",
@@ -40,6 +41,8 @@
     "@ionic-native/status-bar": "^5.0.0",
     "@ionic/angular": "^4.7.1",
     "@ionic/storage": "^2.2.0",
+    "@types/jest": "^24.0.18",
+    "@types/mocha": "^5.2.7",
     "censor-sensor": "^1.0.5",
     "chance": "^1.0.18",
     "compression": "^1.7.4",
@@ -105,9 +108,16 @@
     "@types/socketcluster": "^14.0.2",
     "chokidar": "^2.1.2",
     "codelyzer": "~4.5.0",
+    "karma": "^4.3.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-coverage-istanbul-reporter": "^2.1.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-jasmine-html-reporter": "^1.4.2",
     "protractor": "~5.4.0",
+    "sonar-scanner": "^3.1.0",
     "ts-node": "~8.0.0",
-    "tslint": "~5.12.0"
+    "tslint": "~5.12.0",
+    "tslint-sonarts": "^1.9.0"
   },
   "engines": {
     "node": ">=11 <12"

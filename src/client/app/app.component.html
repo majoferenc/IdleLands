@@ -17,23 +17,22 @@
 
         <ion-list *ngIf="(gameService.player$ | async) as player">
           <ion-menu-toggle auto-hide="false">
-            <ion-item class="big-item" 
-                      [routerDirection]="'root'"
-                      [routerLink]="['/character']">
-  
-              <app-gendervatar slot="start" [gender]="player.gender"></app-gendervatar> 
-  
+            <ion-item class="big-item" [routerDirection]="'root'" [routerLink]="['/character']">
+
+              <app-gendervatar slot="start" [gender]="player.gender"></app-gendervatar>
+
               <ng-container *ngIf="gameService.choices | async as choices">
-                <ion-badge class="thought-bubble" slot="start" color="secondary" *ngIf="choices?.length">{{ choices.length }}</ion-badge>
+                <ion-badge class="thought-bubble" slot="start" color="secondary" *ngIf="choices?.length">
+                  {{ choices.length }}</ion-badge>
                 <div class="thought-bubble-1" slot="start" *ngIf="choices?.length">&nbsp;</div>
                 <div class="thought-bubble-2" slot="start" *ngIf="choices?.length">&nbsp;</div>
                 <div class="thought-bubble-3" slot="start" *ngIf="choices?.length">&nbsp;</div>
               </ng-container>
 
               <ion-badge class="menu-bottom-left" color="secondary" *ngIf="player.$party">In Party</ion-badge>
-              
+
               <ion-label class="ion-text-wrap">
-                {{ player.name }}<span *ngIf="player.title">, the {{ player.title }}</span>
+                {{ player.name }}<span id="playerTitle" *ngIf="player.title">, the {{ player.title }}</span>
                 <p>Level {{ player.level.__current }}/{{ player.level.maximum }} {{ player.profession }}</p>
                 <p>{{ player.map }} / {{ player.region }}</p>
                 <p>
@@ -41,26 +40,13 @@
                   <span class="ion-padding-start">{{ player.gold | number }} Gold</span>
                 </p>
               </ion-label>
-  
-              <circle-progress
-                slot="end"
-                [percent]="(player.xp.__current / player.xp.maximum) * 100"
-                [radius]="20"
-                [outerStrokeWidth]="4"
-                [innerStrokeWidth]="0"
-                [outerStrokeColor]="'#78C000'"
-                [innerStrokeColor]="''"
-                [showSubtitle]="false"
-                [showUnits]="false"
-                [animation]="false"
-                [renderOnClick]="false"
-                [title]="playerCircleText(player)"
-                [backgroundStroke]="'#C7E596'"
-                [backgroundStrokeWidth]="2"
-                [backgroundPadding]="2"
-                [animationDuration]="300"
-              ></circle-progress>
-  
+
+              <circle-progress slot="end" [percent]="(player.xp.__current / player.xp.maximum) * 100" [radius]="20"
+                [outerStrokeWidth]="4" [innerStrokeWidth]="0" [outerStrokeColor]="'#78C000'" [innerStrokeColor]="''"
+                [showSubtitle]="false" [showUnits]="false" [animation]="false" [renderOnClick]="false"
+                [title]="playerCircleText(player)" [backgroundStroke]="'#C7E596'" [backgroundStrokeWidth]="2"
+                [backgroundPadding]="2" [animationDuration]="300"></circle-progress>
+
             </ion-item>
           </ion-menu-toggle>
 
@@ -72,18 +58,15 @@
             <ion-icon slot="start" [src]="add"></ion-icon> Install IdleLands
           </ion-item>
 
-          <ion-menu-toggle auto-hide="false" 
-                           *ngFor="let page of appPages" 
-                           [class.ion-hide]="page.hideIf && page.hideIf(player)">
+          <ion-menu-toggle auto-hide="false" *ngFor="let page of appPages"
+            [class.ion-hide]="page.hideIf && page.hideIf(player)">
 
-            <ion-item [routerDirection]="'root'" 
-                      [routerLink]="[page.url]" 
-                      [queryParams]="page.queryParams">
+            <ion-item [routerDirection]="'root'" [routerLink]="[page.url]" [queryParams]="page.queryParams">
 
               <ion-icon slot="start" [src]="'assets/icon/category-' + page.icon + '.svg'"></ion-icon>
 
               <ion-label>
-                {{ page.name }} 
+                {{ page.name }}
               </ion-label>
 
               <ion-badge slot="end" *ngIf="page.badge && page.badge(player)" [color]="page.badgeColor">
@@ -94,7 +77,7 @@
           </ion-menu-toggle>
 
           <ion-item href="https://patreon.com/seiyria" target="_blank" color="tertiary"
-                    *ngIf="!player.$statisticsData?.Game?.Premium?.Tier">
+            *ngIf="!player.$statisticsData?.Game?.Premium?.Tier">
             <ion-icon slot="start" name="ribbon"></ion-icon> Support IdleLands on Patreon!
           </ion-item>
 
@@ -105,13 +88,14 @@
               Logout
             </ion-label>
           </ion-item>
-          
+
         </ion-list>
       </ion-content>
-      
+
     </ion-menu>
 
-    <ion-menu class="player-menu" side="end" #playerMenu [swipeGesture]="false" type="overlay" [class.ion-hide]="hiddenPlayerMenu">
+    <ion-menu class="player-menu" side="end" #playerMenu [swipeGesture]="false" type="overlay"
+      [class.ion-hide]="hiddenPlayerMenu">
       <ion-header>
         <ion-toolbar color="primary">
           <ion-title>Players ({{ gameService.players.length }})</ion-title>
@@ -123,7 +107,7 @@
         </div>
         <ion-list>
           <ion-item *ngFor="let player of gameService.players">
-            <app-gendervatar slot="start" [gender]="player.gender"></app-gendervatar> 
+            <app-gendervatar slot="start" [gender]="player.gender"></app-gendervatar>
 
             <ion-label>
               <h2>
@@ -134,7 +118,8 @@
                 {{ player.name }}<span *ngIf="player.title">, the {{ player.title }}</span>
               </h2>
               <p class="vertical-center">
-                <ion-badge color="secondary"><span *ngIf="player.ascensionLevel">{{ player.ascensionLevel }}★</span>{{ player.level }}</ion-badge>                
+                <ion-badge color="secondary"><span
+                    *ngIf="player.ascensionLevel">{{ player.ascensionLevel }}★</span>{{ player.level }}</ion-badge>
                 &nbsp; {{ player.profession }}
               </p>
             </ion-label>

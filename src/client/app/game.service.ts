@@ -11,8 +11,10 @@ import * as Fingerprint from 'fingerprintjs2';
 
 import { SocketClusterService, Status } from './socket-cluster.service';
 import { IPlayer } from '../../shared/interfaces/IPlayer';
-import { ServerEventName, IAdventureLog, IItem, Channel, PlayerChannelOperation, IMessage,
-  GachaNameReward, IChoice, IAchievement, ICollectible, IAdventure, IGuild } from '../../shared/interfaces';
+import {
+  ServerEventName, IAdventureLog, IItem, Channel, PlayerChannelOperation, IMessage,
+  GachaNameReward, IChoice, IAchievement, ICollectible, IAdventure, IGuild
+} from '../../shared/interfaces';
 import { AuthService } from './auth.service';
 
 import { environment } from '../environments/environment';
@@ -98,7 +100,7 @@ export class GameService {
   }
 
   public get loggedInAndConnected(): boolean {
-    if(!this.currentPlayer) return false;
+    if (!this.currentPlayer) return false;
     return this.sessionId === this.currentPlayer.sessionId && this.socketService.status$.value === Status.Connected;
   }
 
@@ -107,7 +109,7 @@ export class GameService {
     return this.allPlayers;
   }
 
-  public playerInfoHash: any = { };
+  public playerInfoHash: any = {};
 
   private allMessages: IMessage[] = [];
   public get messages(): IMessage[] {
@@ -121,18 +123,18 @@ export class GameService {
 
   public playerMenu: IonMenu;
 
-  public gameSettings: any = { };
+  public gameSettings: any = {};
 
   public guild: IGuild;
 
   public get isGuildMod(): boolean {
-    if(!this.guild || !this.currentPlayer) return false;
+    if (!this.guild || !this.currentPlayer) return false;
     return this.guild.members[this.currentPlayer.name] >= 5;
   }
 
   public get isGuildLeader(): boolean {
-    if(!this.guild || !this.currentPlayer) return false;
-    return this.guild.members[this.currentPlayer.name] >=  10;
+    if (!this.guild || !this.currentPlayer) return false;
+    return this.guild.members[this.currentPlayer.name] >= 10;
   }
 
   constructor(
@@ -149,7 +151,7 @@ export class GameService {
 
     const root = document.querySelector(':root');
     root.classList.forEach(cls => {
-      if(!cls.includes('theme')) return;
+      if (!cls.includes('theme')) return;
       root.classList.remove(cls);
     });
 
@@ -168,24 +170,19 @@ export class GameService {
 
   private setAdventureLog(log: IAdventureLog[]) {
     const totalLength = get(this.playerRef, '$statisticsData.Game.Premium.Upgrade.AdventureLogSize', 25);
-    if(log.length > totalLength) log.length = totalLength;
+    if (log.length > totalLength) log.length = totalLength;
 
     this.adventureLog.next(log);
     this.storage.set('adventureLog', log);
   }
 
-  private setCurrentPlayer(player: IPlayer) {
-    if(this.currentPlayer && !player.$achievementsData) return;
-
+  public setCurrentPlayer(player: IPlayer) {
     const curPlayer = this.currentPlayer;
-
     this.currentPlayer = player;
     this.setSessionId(this.currentPlayer.sessionId);
     this.setLoggedInId(this.currentPlayer._id);
     this.player.next(player);
-
     this.checkPlayerUpdatesForNotifications(curPlayer, player);
-
     (<any>window).discordGlobalCharacter = player;
   }
 
@@ -246,17 +243,17 @@ export class GameService {
 
     patches.forEach(({ path }) => {
       updateOrders.forEach(order => {
-        if(order.flag || !path.includes(order.pathSearch)) return;
+        if (order.flag || !path.includes(order.pathSearch)) return;
         order.flag = true;
       });
     });
 
     updateOrders.forEach(order => {
       const curData = order.observable.getValue();
-      if(!curData || order.flag) {
+      if (!curData || order.flag) {
         (<any>order.observable).next(
-          <any> order.order(
-            <any> order.playerData(player)
+          <any>order.order(
+            <any>order.playerData(player)
           )
         );
       }
@@ -266,7 +263,7 @@ export class GameService {
   public async init() {
     await this.initUser();
 
-    this.notificationSettings = await this.storage.get('notifications') || { };
+    this.notificationSettings = await this.storage.get('notifications') || {};
     this.changeTheme(await this.storage.get('theme') || 'Default');
 
     this.setSessionId(await this.storage.get('sessionId'));
@@ -276,8 +273,8 @@ export class GameService {
     this.allMessages = await this.storage.get('lastMessages') || [];
 
     this.socketService.status$.subscribe(status => {
-      if(status !== Status.Connected) {
-        if(!this.currentPlayer) return;
+      if (status !== Status.Connected) {
+        if (!this.currentPlayer) return;
 
         this.allPlayers = [];
 
@@ -297,7 +294,7 @@ export class GameService {
 
     this.initCharacterWatches();
 
-    if(this.sessionId) {
+    if (this.sessionId) {
       setTimeout(() => {
         this.socketService.emit(ServerEventName.PlayGame, {
           sessionId: this.sessionId,
@@ -311,7 +308,7 @@ export class GameService {
     return new Promise(resolve => {
       setTimeout(async () => {
         const storedFingerprint = await this.storage.get('fingerprint');
-        if(storedFingerprint) {
+        if (storedFingerprint) {
           this.userId.next(storedFingerprint);
           return resolve(storedFingerprint);
         }
@@ -338,7 +335,7 @@ export class GameService {
   }
 
   private refreshPlayerInfoHash() {
-    this.playerInfoHash = { };
+    this.playerInfoHash = {};
     this.allPlayers.forEach(p => this.playerInfoHash[p.name] = p);
   }
 
@@ -348,12 +345,12 @@ export class GameService {
     });
 
     this.socketService.register(ServerEventName.CharacterSync, (char) => {
-      if(!char.loggedIn) return;
+      if (!char.loggedIn) return;
       this.setCurrentPlayer(char);
     });
 
     this.socketService.register(ServerEventName.CharacterPatch, (patches) => {
-      if(!this.currentPlayer || !patches) return;
+      if (!this.currentPlayer || !patches) return;
 
       // these errors are usually just invalid patches, which is whatever
       try {
@@ -363,12 +360,12 @@ export class GameService {
         setTimeout(() => {
           this.manageAndApplyPatchesToObservables(this.currentPlayer, patches);
         }, 0);
-      } catch(e) { }
+      } catch (e) { }
     });
 
     this.socketService.register(ServerEventName.AdventureLogAdd, (advData) => {
       const log = this.adventureLog.getValue();
-      if(advData.timestamp) {
+      if (advData.timestamp) {
         advData.message = advData.message.split('%timestamp').join(new Date(advData.timestamp).toLocaleString());
       }
       log.unshift(advData);
@@ -386,7 +383,7 @@ export class GameService {
     });
 
     this.socketService.watch(Channel.PlayerUpdates, ({ player, operation }) => {
-      switch(operation) {
+      switch (operation) {
         case PlayerChannelOperation.Add: {
           this.allPlayers.push(player);
           this.sortAndUniqPlayerList();
@@ -423,11 +420,11 @@ export class GameService {
   private addMessage(message: IMessage) {
     this.allMessages.push(message);
 
-    while(this.allMessages.length > 200) this.allMessages.shift();
+    while (this.allMessages.length > 200) this.allMessages.shift();
 
     this.storage.set('lastMessages', this.allMessages);
 
-    if(!window.location.href.includes('/chat')) {
+    if (!window.location.href.includes('/chat')) {
       this.newMessages++;
     }
   }
@@ -449,8 +446,8 @@ export class GameService {
   public async itemCompare(newItem: IItem, currentItem: IItem, choiceId?: string) {
     const stats = ['str', 'int', 'dex', 'agi', 'con', 'luk', 'hp', 'xp', 'gold'];
 
-    const newStats = newItem ? newItem.stats : { };
-    const curStats = currentItem ? currentItem.stats : { };
+    const newStats = newItem ? newItem.stats : {};
+    const curStats = currentItem ? currentItem.stats : {};
 
     stats.forEach(stat => {
       newStats[stat] = newStats[stat] || 0;
@@ -461,12 +458,12 @@ export class GameService {
       let classColor = '';
       let symbol = '→';
 
-      if(newStats[stat] > curStats[stat]) {
+      if (newStats[stat] > curStats[stat]) {
         symbol = '↗';
         classColor = 'ion-color-success';
       }
 
-      if(newStats[stat] < curStats[stat]) {
+      if (newStats[stat] < curStats[stat]) {
         symbol = '↘';
         classColor = 'ion-color-danger';
       }
@@ -514,34 +511,42 @@ export class GameService {
     const choice: IChoice = find(this.currentPlayer.$choicesData.choices as IChoice[], { id: choiceId });
 
     const buttons = [];
-    if(choice) {
-      if(choice.choices.includes('Yes')) {
-        buttons.push({ text: 'Equip', handler: () => {
-          if(!choiceId) return;
+    if (choice) {
+      if (choice.choices.includes('Yes')) {
+        buttons.push({
+          text: 'Equip', handler: () => {
+            if (!choiceId) return;
 
-          this.socketService.emit(ServerEventName.ChoiceMake, { choiceId, valueChosen: 'Yes' });
-        } });
+            this.socketService.emit(ServerEventName.ChoiceMake, { choiceId, valueChosen: 'Yes' });
+          }
+        });
       }
 
-      if(choice.choices.includes('Inventory')) {
-        buttons.push({ text: 'Inventory', handler: () => {
-          if(!choiceId) return;
+      if (choice.choices.includes('Inventory')) {
+        buttons.push({
+          text: 'Inventory', handler: () => {
+            if (!choiceId) return;
 
-          this.socketService.emit(ServerEventName.ChoiceMake, { choiceId, valueChosen: 'Inventory' });
-        } });
+            this.socketService.emit(ServerEventName.ChoiceMake, { choiceId, valueChosen: 'Inventory' });
+          }
+        });
       }
 
-      if(choice.choices.includes('Sell')) {
-        buttons.push({ text: 'Sell', handler: () => {
-          if(!choiceId) return;
+      if (choice.choices.includes('Sell')) {
+        buttons.push({
+          text: 'Sell', handler: () => {
+            if (!choiceId) return;
 
-          this.socketService.emit(ServerEventName.ChoiceMake, { choiceId, valueChosen: 'Sell' });
-        } });
+            this.socketService.emit(ServerEventName.ChoiceMake, { choiceId, valueChosen: 'Sell' });
+          }
+        });
       }
     } else {
-      buttons.push({ text: 'Equip', handler: () => {
-        this.socketService.emit(ServerEventName.ItemEquip, { itemId: newItem.id });
-      } });
+      buttons.push({
+        text: 'Equip', handler: () => {
+          this.socketService.emit(ServerEventName.ItemEquip, { itemId: newItem.id });
+        }
+      });
     }
 
     const alert = await this.alertCtrl.create({
@@ -561,21 +566,21 @@ export class GameService {
 
   private determineRewardName(reward: string) {
     const res = GachaNameReward[reward];
-    if(res) return res;
+    if (res) return res;
 
-    if(reward.includes('teleportscroll')) {
+    if (reward.includes('teleportscroll')) {
       return `Teleport Scroll: ${reward.split(':')[2]}`;
     }
 
-    if(reward.includes('collectible:guardian')) {
+    if (reward.includes('collectible:guardian')) {
       return `Collectible (${reward.split(':')[2]})`;
     }
 
-    if(reward.includes('collectible:historical')) {
+    if (reward.includes('collectible:historical')) {
       return `Collectible (${reward.split(':')[2]})`;
     }
 
-    if(reward.includes('item:guardian')) {
+    if (reward.includes('item:guardian')) {
       return `Item (${reward.split(':')[2]})`;
     }
 
@@ -604,16 +609,16 @@ export class GameService {
   public async toggleNotificationSetting(setting: string) {
     this.notificationSettings[setting] = !this.notificationSettings[setting];
 
-    if(setting === 'enabled' && this.notificationSettings[setting]) {
+    if (setting === 'enabled' && this.notificationSettings[setting]) {
       const res = await this.requestNotificationPermission();
-      if(!res) return;
+      if (!res) return;
     }
 
     this.storage.set('notifications', this.notificationSettings);
   }
 
   public async requestNotificationPermission() {
-    if(!window['Notification']) return false;
+    if (!window['Notification']) return false;
 
     const res = await Notification.requestPermission();
     if (res === 'granted') {
@@ -635,31 +640,31 @@ export class GameService {
   }
 
   private checkPlayerUpdatesForNotifications(player: IPlayer, nowPlayer: IPlayer) {
-    if(!player || !nowPlayer) return;
-    if(!window['Notification']) return;
-    if(window['Notification'].permission !== 'granted') return;
+    if (!player || !nowPlayer) return;
+    if (!window['Notification']) return;
+    if (window['Notification'].permission !== 'granted') return;
 
-    if(this.notificationSettings.fullChoiceLog
-    && player.$choicesData.choices.length !== player.$choicesData.size
-    && nowPlayer.$choicesData.choices.length === nowPlayer.$choicesData.size) {
+    if (this.notificationSettings.fullChoiceLog
+      && player.$choicesData.choices.length !== player.$choicesData.size
+      && nowPlayer.$choicesData.choices.length === nowPlayer.$choicesData.size) {
       this.createNotification(
         'Choice Log Full',
         'Your choice log is full. Decisions will be made automatically if any more choices come up.'
       );
     }
 
-    if(this.notificationSettings.readyToAscend
-    && player.level.__current !== player.level.maximum
-    && player.level.__current === player.level.maximum) {
+    if (this.notificationSettings.readyToAscend
+      && player.level.__current !== player.level.maximum
+      && player.level.__current === player.level.maximum) {
       this.createNotification(
         'Ready to Ascend',
         'It\'s time to ascend!'
       );
     }
 
-    if(this.notificationSettings.fullStamina
-    && player.stamina.__current !== player.stamina.maximum
-    && player.stamina.__current === player.stamina.maximum) {
+    if (this.notificationSettings.fullStamina
+      && player.stamina.__current !== player.stamina.maximum
+      && player.stamina.__current === player.stamina.maximum) {
       this.createNotification(
         'Stamina Full',
         'Your stamina is full. Use it or lose it!'
